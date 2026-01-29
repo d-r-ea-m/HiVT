@@ -1,0 +1,28 @@
+python train.py --root /home/hxf/argo --embed_dim 64
+python train.py --root /home/hxf/argo --embed_dim 128
+python eval.py --root /home/hxf/argo --batch_size 32 --ckpt_path /home/hxf/aimodel/hivt/checkpoints/HiVT-64/checkpoints/epoch-63-step-411903.ckpt
+pip install -e /home/hxf/aimodel/argo-api
+
+
+
+# 找到最新的检查点文件
+LATEST_CKPT=$(ls -t lightning_logs/version_*/checkpoints/*.ckpt | head -1)
+
+# 使用它恢复训练
+python train.py --root /home/hxf/argo --embed_dim 64 --ckpt_path $LATEST_CKPT
+
+ free -h && echo "---" && nvidia-smi
+ dmesg | tail -30
+
+sudo cp -r hivt hivt_bak
+
+python train_intent.py --root /home/hxf/argo --embed_dim 64
+
+
+tensorboard --logdir lightning_logs/version_28 --port 6006
+tensorboard --logdir lightning_logs/version_30 --port 6006
+# 然后在浏览器打开：
+# http://localhost:6006
+# 若在远程服务器上，替换localhost为服务器IP并开启端口转发
+
+python /root/HiVT/train.py --embed_dim 64
