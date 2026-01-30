@@ -75,10 +75,15 @@ class ArgoverseV1Dataset(Dataset):
 
     def process(self) -> None:
         am = ArgoverseMap()
+        os.makedirs(self.processed_dir, exist_ok=True)
         for raw_path in tqdm(self.raw_paths):
+            seq_id = os.path.splitext(os.path.basename(raw_path))[0]
+            processed_path = os.path.join(self.processed_dir, f"{seq_id}.pt")
+            if os.path.exists(processed_path):
+                continue
             kwargs = process_argoverse(self._split, raw_path, am, self._local_radius)
             data = TemporalData(**kwargs)
-            torch.save(data, os.path.join(self.processed_dir, str(kwargs['seq_id']) + '.pt'))
+            torch.save(data, processed_path)
 
     def len(self) -> int:
         return len(self._raw_file_names)
